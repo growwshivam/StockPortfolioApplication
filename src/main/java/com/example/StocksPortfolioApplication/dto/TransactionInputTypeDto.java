@@ -2,9 +2,11 @@ package com.example.StocksPortfolioApplication.dto;
 
 
 import com.example.StocksPortfolioApplication.model.TransactionType;
+import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
 
+@EqualsAndHashCode
 public class TransactionInputTypeDto {
     private Integer userAccountId;
     private Integer stockId;

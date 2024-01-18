@@ -8,7 +8,6 @@ import java.util.List;
 @Table(name="stocks")
 public class Stock {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer stockId;
     private Double openPrice;
     private Double closePrice;
@@ -29,7 +28,8 @@ public class Stock {
 
     }
 
-    public Stock(Double openPrice, Double closePrice, Double highPrice, Double lowPrice, Integer quantity, String name, Double currentPrice) {
+    public Stock(Integer stockId, Double openPrice, Double closePrice, Double highPrice, Double lowPrice, Integer quantity, String name, Double currentPrice) {
+        this.stockId = stockId;
         this.openPrice = openPrice;
         this.closePrice = closePrice;
         this.highPrice = highPrice;

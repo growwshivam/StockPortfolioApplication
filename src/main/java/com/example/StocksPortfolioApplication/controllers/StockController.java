@@ -1,10 +1,8 @@
 package com.example.StocksPortfolioApplication.controllers;
 
-import com.example.StocksPortfolioApplication.dto.StockUpdatingDto;
-import com.example.StocksPortfolioApplication.helperfunction.GenerateStockToBeUpdate;
+import com.example.StocksPortfolioApplication.utils.GenerateStockToBeUpdate;
 import com.example.StocksPortfolioApplication.model.Stock;
 import com.example.StocksPortfolioApplication.service.StockService;
-import com.example.StocksPortfolioApplication.service.StockServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
+
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/stocks")
@@ -31,17 +30,19 @@ public class StockController {
     ResponseEntity<List<Stock>> getAllStocks(){
         try{
             return new ResponseEntity<>(stockService.getAllStocks(), HttpStatusCode.valueOf(200));
-        }catch(Exception E){
+        } catch (RuntimeException E) {
            return new ResponseEntity<>(HttpStatusCode.valueOf(404));
         }
     }
 
     @GetMapping("/getStockDetails/{stockId}")
-    ResponseEntity<Stock> getStockById(@PathVariable Integer stockId){
+    ResponseEntity<? extends Object> getStockById(@PathVariable Integer stockId) throws RuntimeException {
+
         try{
-            return new ResponseEntity<>(stockService.getStockById(stockId).get(),HttpStatusCode.valueOf(404));}
-        catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(stockService.getStockById(stockId).get(), HttpStatus.ACCEPTED);
+        } catch (RuntimeException ex) {
+
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 
         }
     }
@@ -50,7 +51,7 @@ public class StockController {
     ResponseEntity<String> createStock(@RequestBody   Stock stockToBeAdded){
         try{
             return new ResponseEntity<>(stockService.addStock(stockToBeAdded),HttpStatusCode.valueOf(201));
-        }catch(Exception E){
+        } catch (RuntimeException E) {
             return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
         }
     }
@@ -59,36 +60,27 @@ public class StockController {
     ResponseEntity<String> updateStockById(@PathVariable Integer stockId,@RequestBody Stock stockToBeUpdated){
         try{
             return new ResponseEntity<>(stockService.updateStockByStockId(stockId,stockToBeUpdated),HttpStatus.ACCEPTED);
-        }catch(Exception E){
+        } catch (RuntimeException E) {
             return new ResponseEntity<>(E.getMessage(),HttpStatus.BAD_REQUEST);
         }
 
     }
 
     @PostMapping("/uploadCSV")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException{
-        // Check if the file is not empty
+    public ResponseEntity<String> handleFileUploadAsync(@RequestParam("file") MultipartFile file) throws IOException, RuntimeException {
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("Please upload a CSV file.");
+            return ResponseEntity.badRequest().body("Please upload correct format file.");
         }
 
-        // Process the CSV file (you can implement your logic here)
-        // For example, you can read the content of the CSV file using libraries like OpenCSV.
-
-        // Placeholder response message
-//        String responseMessage = "File uploaded successfully: " + file.getOriginalFilename();
-//        return ResponseEntity.ok(responseMessage);
-        try  {
-
-           List<Stock> listOfAllStocksToBeUpdated= generateStockToBeUpdate.generateListOfStockToBeUpdated(file);
-           return new ResponseEntity<>(stockService.updateListOfStocks(listOfAllStocksToBeUpdated),HttpStatus.ACCEPTED);
-        } catch (IOException e) {
-            return new ResponseEntity<>("Error reading the file", HttpStatus.INTERNAL_SERVER_ERROR);
-        }catch(Exception E){
-            return new ResponseEntity<>("Error in updation of stocks",HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity.status(200).body(stockService.updateAllStocks(file));
+        } catch (IOException io) {
+            return ResponseEntity.status(408).body(io.getMessage());
+        } catch (RuntimeException E) {
+            return ResponseEntity.badRequest().body(E.getMessage());
         }
+
     }
-
 
 
 }

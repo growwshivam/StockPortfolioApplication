@@ -6,6 +6,8 @@ import lombok.NonNull;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity
@@ -23,16 +25,21 @@ public class User {
     @NotNull
     private String phoneNumber;
 
-    @Email
+    @Size(min = 1)
     private String email;
+
+
+    private Double balance = 0.0;
 
     public User(){
 
     }
-    public User(String name, String phoneNumber, String email) {
+
+    public User(String name, String phoneNumber, String email, Double balance) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.balance = balance;
     }
 
     public Integer getUserAccountId() {
@@ -65,5 +72,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
     }
 }

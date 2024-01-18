@@ -1,7 +1,7 @@
-package com.example.StocksPortfolioApplication.repository;
+package com.example.StocksPortfolioApplication.dao;
 
 import com.example.StocksPortfolioApplication.model.TransactionType;
-import com.example.StocksPortfolioApplication.model.UserPortfolio;
+import com.example.StocksPortfolioApplication.dao.UserPortfolio;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

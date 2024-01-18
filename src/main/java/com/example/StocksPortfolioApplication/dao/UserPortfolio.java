@@ -1,6 +1,7 @@
-package com.example.StocksPortfolioApplication.model;
+package com.example.StocksPortfolioApplication.dao;
 
 
+import com.example.StocksPortfolioApplication.model.TransactionType;
 import jakarta.persistence.*;
 import org.antlr.v4.runtime.misc.Pair;
 

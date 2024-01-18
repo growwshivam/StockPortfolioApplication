@@ -8,6 +8,7 @@ class StocksPortfolioApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

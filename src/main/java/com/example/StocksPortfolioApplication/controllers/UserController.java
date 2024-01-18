@@ -1,11 +1,16 @@
 package com.example.StocksPortfolioApplication.controllers;
 
+import com.example.StocksPortfolioApplication.dto.InputUserDto;
+import com.example.StocksPortfolioApplication.dto.TransactionInputTypeDto;
 import com.example.StocksPortfolioApplication.model.User;
 import com.example.StocksPortfolioApplication.service.UserService;
 import com.example.StocksPortfolioApplication.service.UserServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/users")
@@ -17,12 +22,14 @@ public class UserController {
     }
 
     @PostMapping("/createUser")
-    ResponseEntity<String> createUser(@RequestBody User userToBeAdded){
+    ResponseEntity<String> createUser(@Valid @RequestBody InputUserDto userToBeAdded) {
+
         try{
 
             return new ResponseEntity<>(userService.addUser(userToBeAdded), HttpStatus.CREATED);
 
-        }catch(Exception E){
+        } catch (RuntimeException E) {
+
             return new ResponseEntity<>(E.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
@@ -30,9 +37,11 @@ public class UserController {
     @GetMapping("/getUser/{userId}")
     ResponseEntity<? extends Object> getUser(@PathVariable Integer userId){
         try{
-            //User user=userService.getUserById(userId).orElseThrow(()->new Exception("No Such User Exits in the table"));
+
             return new ResponseEntity<>(userService.getUserById(userId).get(),HttpStatus.ACCEPTED);
-        }catch(Exception E){
+
+        } catch (RuntimeException E) {
+
             return new ResponseEntity<>(E.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
@@ -41,7 +50,31 @@ public class UserController {
     ResponseEntity<? extends Object> deleteUser(@PathVariable Integer userId){
         try{
             return new ResponseEntity<>(userService.deleteUserById(userId),HttpStatus.ACCEPTED);
-        }catch(Exception E){
+
+        } catch (RuntimeException E) {
+
+            return new ResponseEntity<>(E.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/makeTrading")
+    public ResponseEntity<? extends Object> makeTransaction(@RequestBody TransactionInputTypeDto transactionInputTypeDto) {
+        try {
+
+            return new ResponseEntity<>(userService.tradingApi(transactionInputTypeDto.getUserAccountId(), transactionInputTypeDto.getStockId(), transactionInputTypeDto.getQuantity(), transactionInputTypeDto.getTransactionType()), HttpStatus.CREATED);
+        } catch (RuntimeException E) {
+
+            return new ResponseEntity<>(E.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/getPortfolio/{userId}")
+    public ResponseEntity<? extends Object> findPortfolioOfUser(@PathVariable Integer userId) {
+        try {
+
+            return new ResponseEntity<>(userService.getPortfolioOfUser(userId), HttpStatus.ACCEPTED);
+        } catch (RuntimeException E) {
+
             return new ResponseEntity<>(E.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }

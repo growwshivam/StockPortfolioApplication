@@ -1,13 +1,16 @@
-package com.example.StocksPortfolioApplication.service;
+package com.example.StocksPortfolioApplication.dao;
 
 
+import com.example.StocksPortfolioApplication.dao.UserPortfolioService;
 import com.example.StocksPortfolioApplication.dto.StockDetailsDto;
 import com.example.StocksPortfolioApplication.dto.UserPortfolioDetailsDto;
 import com.example.StocksPortfolioApplication.model.Stock;
 import com.example.StocksPortfolioApplication.model.TransactionType;
 import com.example.StocksPortfolioApplication.model.User;
-import com.example.StocksPortfolioApplication.model.UserPortfolio;
-import com.example.StocksPortfolioApplication.repository.UserPortfolioRepositroy;
+import com.example.StocksPortfolioApplication.dao.UserPortfolio;
+import com.example.StocksPortfolioApplication.dao.UserPortfolioRepositroy;
+import com.example.StocksPortfolioApplication.service.StockService;
+import com.example.StocksPortfolioApplication.service.UserService;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Service;
 
@@ -29,21 +32,21 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
         this.userService = userService;
     }
 
-   public String makeTransaction(Integer userAccountId, Integer stockId, TransactionType transactionType,Integer quantity) throws Exception{
+    public String makeTransaction(Integer userAccountId, Integer stockId, TransactionType transactionType, Integer quantity) throws RuntimeException {
         Optional<UserPortfolio> currentUserPortfolio=userPortfolioRepositroy.findUserPortfolioByUserAccountIdAndStockIdAndTransactionType(userAccountId,stockId,transactionType);
         Optional<User> currentUser=userService.getUserById(userAccountId);
         Optional<Stock> currentStock=stockService.getStockById(stockId);
         if(!currentUser.isPresent()){
-            throw new Exception("Transaction is not Possible As No User exists in the table");
+            throw new RuntimeException("Transaction is not Possible As No User exists in the table");
         }
         if(!currentStock.isPresent()){
-            throw new Exception("Transaction not possible as no such stock exists");
+            throw new RuntimeException("Transaction not possible as no such stock exists");
         }
         if(currentUserPortfolio.isPresent()){
             if(transactionType==TransactionType.SELL){
                 Optional<UserPortfolio> currentUserPortfolioInBuying=userPortfolioRepositroy.findUserPortfolioByUserAccountIdAndStockIdAndTransactionType(userAccountId,stockId,TransactionType.BUY);
                 if(currentUserPortfolioInBuying.get().getQuantity()<quantity){
-                    throw new Exception("Transaction of selling is not possible");
+                    throw new RuntimeException("Transaction of selling is not possible");
                 }
                 UserPortfolio actualUserPortfolioInBuying=currentUserPortfolioInBuying.get();
                 actualUserPortfolioInBuying.setQuantity(actualUserPortfolioInBuying.getQuantity()-quantity);
@@ -79,7 +82,7 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
             Optional<UserPortfolio> currentUserPortfolioInBuying=userPortfolioRepositroy.findUserPortfolioByUserAccountIdAndStockIdAndTransactionType(userAccountId,stockId,TransactionType.BUY);
             if(currentUserPortfolioInBuying.isPresent()){
                 if(quantity> currentUserPortfolioInBuying.get().getQuantity()){
-                    throw new Exception("Transaction is not possible as quantity of selling is greater than buying");
+                    throw new RuntimeException("Transaction is not possible as quantity of selling is greater than buying");
                 }
                 UserPortfolio actualUserPortfolioInBuying=currentUserPortfolioInBuying.get();
                 actualUserPortfolioInBuying.setQuantity(actualUserPortfolioInBuying.getQuantity()-quantity);
@@ -91,7 +94,7 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
                 return "Transaction of selling stock has been successfully completed";
             }
 
-            throw new Exception("Transaction of selling is not possible as no such stock exists in the buying section of user");
+            throw new RuntimeException("Transaction of selling is not possible as no such stock exists in the buying section of user");
 
         }
         else{
@@ -100,7 +103,7 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
         }
     }
 
-   public UserPortfolioDetailsDto getAllPortfoliosOfUserById(Integer userAccountId)throws Exception{
+    public UserPortfolioDetailsDto getAllPortfoliosOfUserById(Integer userAccountId) throws RuntimeException {
 
         List<UserPortfolio> allPortfoliosOfCurrentUser=userPortfolioRepositroy.findUserPortfolioByUserAccountId(userAccountId);
         List<StockDetailsDto> listOfAllStocksPresent=new ArrayList<>();
@@ -129,17 +132,17 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
 
     }
 
-    public String makeTrading(Integer userAccountId, Integer stockId, TransactionType transactionType, Integer quantity) throws Exception {
+    public String makeTrading(Integer userAccountId, Integer stockId, TransactionType transactionType, Integer quantity) throws RuntimeException {
         Optional<UserPortfolio> currentUserPortfolio = userPortfolioRepositroy.findUserPortfolioByUserAccountIdAndStockIdAndTransactionType(userAccountId, stockId, transactionType);
         Optional<User> currentUser = userService.getUserById(userAccountId);
         Optional<Stock> currentStock = stockService.getStockById(stockId);
 
         if (!currentUser.isPresent()) {
-            throw new Exception("Transaction is not possible as no user exists in the table");
+            throw new RuntimeException("Transaction is not possible as no user exists in the table");
         }
 
         if (!currentStock.isPresent()) {
-            throw new Exception("Transaction not possible as no such stock exists");
+            throw new RuntimeException("Transaction not possible as no such stock exists");
         }
 
         if (currentUserPortfolio.isPresent()) {
@@ -149,33 +152,33 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
         }
     }
 
-    private String handleExistingPortfolio(UserPortfolio existingPortfolio, Stock currentStock, TransactionType transactionType, Integer quantity) throws Exception {
+    private String handleExistingPortfolio(UserPortfolio existingPortfolio, Stock currentStock, TransactionType transactionType, Integer quantity) throws RuntimeException {
         switch (transactionType) {
             case SELL:
                 return handleSellTransaction(existingPortfolio, currentStock, quantity);
             case BUY:
                 return handleBuyTransaction(existingPortfolio, currentStock, quantity);
             default:
-                throw new Exception("Invalid transaction type");
+                throw new RuntimeException("Invalid transaction type");
         }
     }
 
-    private String handleNewPortfolio(User currentUser, Stock currentStock, TransactionType transactionType, Integer quantity) throws Exception {
+    private String handleNewPortfolio(User currentUser, Stock currentStock, TransactionType transactionType, Integer quantity) throws RuntimeException {
         switch (transactionType) {
             case BUY:
                 return handleBuyTransactionForNewPortfolio(currentUser, currentStock, quantity); case SELL:
                 return handleSellTransactionForNewPortfolio(currentUser,currentStock,quantity);
             default:
-                throw new Exception("Cannot perform " + transactionType + " on a non-existing portfolio");
+                throw new RuntimeException("Cannot perform " + transactionType + " on a non-existing portfolio");
         }
     }
 
-    private String handleSellTransaction(UserPortfolio existingPortfolio, Stock currentStock, Integer quantity) throws Exception {
+    private String handleSellTransaction(UserPortfolio existingPortfolio, Stock currentStock, Integer quantity) throws RuntimeException {
 
         Optional<UserPortfolio> existingPortfolioInBuying= userPortfolioRepositroy.findUserPortfolioByUserAccountIdAndStockIdAndTransactionType(existingPortfolio.getUserAccountId(), currentStock.getStockId(), TransactionType.BUY);
-        try{
+
             if(!existingPortfolioInBuying.isPresent()){
-                throw new Exception("Transaction not possible as user has not buy any of these stocks");
+                throw new RuntimeException("Transaction not possible as user has not buy any of these stocks");
             }
             handleBuyTransactionWhenSelling(existingPortfolioInBuying.get(),currentStock,quantity);
             existingPortfolio.setQuantity(existingPortfolio.getQuantity()+quantity);
@@ -185,14 +188,12 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
 
             userPortfolioRepositroy.save(existingPortfolio);
 
-        }catch(Exception E){
-            throw new Exception("Transaction of selling of stock is not possible as quantity of selling of stocks is greater than quanity of stocks present in the userAccount");
-        }
+
 
         return "Transaction of selling stock has been successfully completed";
     }
 
-    private String handleBuyTransaction(UserPortfolio existingPortfolio, Stock currentStock, Integer quantity) throws Exception {
+    private String handleBuyTransaction(UserPortfolio existingPortfolio, Stock currentStock, Integer quantity) throws RuntimeException {
         existingPortfolio.setQuantity(existingPortfolio.getQuantity() + quantity);
         existingPortfolio.setTransactionCost(existingPortfolio.getTransactionCost()+ currentStock.getCurrentPrice()*quantity);
         existingPortfolio.setTotalTransactionCost(existingPortfolio.getTotalTransactionCost()+currentStock.getCurrentPrice()*quantity);
@@ -201,15 +202,15 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
         return "Transaction of buying stock has been successfully completed";
     }
 
-    private String handleBuyTransactionForNewPortfolio(User currentUser, Stock currentStock, Integer quantity) throws Exception {
+    private String handleBuyTransactionForNewPortfolio(User currentUser, Stock currentStock, Integer quantity) throws RuntimeException {
         UserPortfolio newPortfolio = new UserPortfolio(currentUser.getUserAccountId(), currentUser.getName(), currentStock.getStockId(), currentStock.getName(), TransactionType.BUY, quantity, currentStock.getCurrentPrice() * quantity, currentStock.getCurrentPrice() * quantity, currentStock.getCurrentPrice(), 0.0);
         userPortfolioRepositroy.save(newPortfolio);
         return "Transaction of buying stock has been successfully completed";
     }
 
-    private String handleBuyTransactionWhenSelling(UserPortfolio userPortfolio,Stock currentStock,Integer quantity) throws Exception{
+    private String handleBuyTransactionWhenSelling(UserPortfolio userPortfolio, Stock currentStock, Integer quantity) throws RuntimeException {
         if(userPortfolio.getQuantity()<quantity){
-            throw new Exception("Transaction of selling of stock is not possible");
+            throw new RuntimeException("Transaction of selling of stock is not possible");
         }
         userPortfolio.setQuantity(userPortfolio.getQuantity()-quantity);
         userPortfolio.setTransactionCost(userPortfolio.getTransactionCost() - userPortfolio.getCostPerStock()*quantity);
@@ -220,21 +221,17 @@ public class UserPortfolioServiceImpl implements UserPortfolioService {
 
     }
 
-    private String handleSellTransactionForNewPortfolio(User currentUser,Stock currentStock,Integer quantity) throws Exception{
+    private String handleSellTransactionForNewPortfolio(User currentUser, Stock currentStock, Integer quantity) throws RuntimeException {
         Optional<UserPortfolio> existingPortfolioInBuying= userPortfolioRepositroy.findUserPortfolioByUserAccountIdAndStockIdAndTransactionType(currentUser.getUserAccountId(), currentStock.getStockId(), TransactionType.BUY);
-        try{
-            if(!existingPortfolioInBuying.isPresent()){
-                throw new Exception("Transaction not possible as user has not buy any of these stocks");
+
+        if(!existingPortfolioInBuying.isPresent()){
+            throw new RuntimeException("Transaction not possible as user has not buy any of these stocks");
             }
             handleBuyTransactionWhenSelling(existingPortfolioInBuying.get(),currentStock,quantity);
             Double profitNLoss=(currentStock.getCurrentPrice()-existingPortfolioInBuying.get().getCostPerStock())*quantity;
             UserPortfolio newPortfolio = new UserPortfolio(currentUser.getUserAccountId(), currentUser.getName(), currentStock.getStockId(), currentStock.getName(), TransactionType.SELL, quantity, currentStock.getCurrentPrice() * quantity, existingPortfolioInBuying.get().getCostPerStock() * quantity, currentStock.getCurrentPrice() ,profitNLoss);
             userPortfolioRepositroy.save(newPortfolio);
 
-
-        }catch(Exception E){
-            throw new Exception("Transaction of selling of stock is not possible as quantity of selling of stocks is greater than quanity of stocks present in the userAccount");
-        }
 
         return "Transaction of selling stock has been successfully completed";
     }
