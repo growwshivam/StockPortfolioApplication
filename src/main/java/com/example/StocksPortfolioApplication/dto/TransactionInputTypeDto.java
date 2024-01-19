@@ -2,15 +2,23 @@ package com.example.StocksPortfolioApplication.dto;
 
 
 import com.example.StocksPortfolioApplication.model.TransactionType;
+import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
 
 @EqualsAndHashCode
 public class TransactionInputTypeDto {
+    @NotBlank
     private Integer userAccountId;
+
+    @javax.validation.constraints.NotBlank
     private Integer stockId;
+
+    @NotBlank
     private Integer quantity;
+
+    @NotBlank
     private TransactionType transactionType;
 
     public TransactionInputTypeDto(){

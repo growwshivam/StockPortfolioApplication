@@ -57,8 +57,17 @@ public class UserServiceImpl  implements UserService{
     }
 
 
-    public void updateUser(User user) {
-        userRepository.save(user);
+    public String updateUser(Integer userAccountId, InputUserDto userToBeUpdate) throws RuntimeException {
+        Optional<User> existingUser = userRepository.findUserByUserAccountId(userAccountId);
+        if (existingUser.isPresent()) {
+            existingUser.get().setBalance(userToBeUpdate.getBalance());
+            existingUser.get().setEmail(userToBeUpdate.getEmail());
+            existingUser.get().setPhoneNumber(userToBeUpdate.getPhoneNumber());
+            userRepository.save(existingUser.get());
+            return "Updation Operation has been successfully";
+
+        }
+        return addUser(userToBeUpdate);
     }
 
     public String tradingApi(Integer userAccountId, Integer stockId, Integer quantity, TransactionType transactionType) throws RuntimeException {

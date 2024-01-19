@@ -1,7 +1,7 @@
 package com.example.StocksPortfolioApplication.repository;
 
 
-import com.example.StocksPortfolioApplication.dao.TransactionDao;
+
 import com.example.StocksPortfolioApplication.model.TransactionType;
 import com.example.StocksPortfolioApplication.model.UserTransactionDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +33,6 @@ public interface UserTransactionDetailsRepositroy extends JpaRepository<UserTran
     List<Integer> getAllStocks(@Param("userAccountId") Integer userAccountId);
 
 
-    @Query(nativeQuery = true, value = "SELECT stock.close_price,stock.open_price,user.quantity FROM stocks stock   join users_transaction_details user on stock.stock_id=user.stock_id")
-    List<TransactionDao> getJoinOperation();
+//    @Query(nativeQuery = true, value = "SELECT stock.close_price,stock.open_price,user.quantity FROM stocks stock   join users_transaction_details user on stock.stock_id=user.stock_id")
+//    List<TransactionDao> getJoinOperation();
 }

@@ -1,25 +1,39 @@
 package com.example.StocksPortfolioApplication.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
 @Entity
 @Table(name="stocks")
+
 public class Stock {
     @Id
     private Integer stockId;
+
+
     private Double openPrice;
+
+
     private Double closePrice;
 
+
     private Double highPrice;
+
+
     private Double lowPrice;
 
 //    private Double prevClosePrice;
 //    private Double lastPrice;
 
     private Integer quantity;
+
+
     private String name;
+
 
     private Double currentPrice;
 

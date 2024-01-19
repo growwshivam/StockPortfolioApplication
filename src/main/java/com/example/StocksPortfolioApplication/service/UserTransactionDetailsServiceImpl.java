@@ -24,7 +24,7 @@ public class UserTransactionDetailsServiceImpl implements UserTransactionDetails
 
     public String tradeApiService(User user, Integer stockId, Integer quantity, TransactionType transactionType) throws RuntimeException {
 
-        Optional<Stock> currentStock = stockService.getStockById(stockId);
+        Optional<Stock> currentStock = stockService.findStockById(stockId);
 
         if (!currentStock.isPresent()) {
 
@@ -36,7 +36,6 @@ public class UserTransactionDetailsServiceImpl implements UserTransactionDetails
             case BUY:
                 return handleBuyingTransaction(user, stockId, quantity, transactionType, currentStock.get());
             case SELL:
-
                 return handleSellingTransaction(user, stockId, quantity, transactionType, currentStock.get());
             default:
 
@@ -45,7 +44,7 @@ public class UserTransactionDetailsServiceImpl implements UserTransactionDetails
 
     }
 
-    private String handleBuyingTransaction(User currentUser, Integer stockId, Integer quantity, TransactionType transactionType, Stock currentStock) throws RuntimeException {
+    public String handleBuyingTransaction(User currentUser, Integer stockId, Integer quantity, TransactionType transactionType, Stock currentStock) throws RuntimeException {
 
         if (currentUser.getBalance() < (currentStock.getCurrentPrice() * quantity)) {
             throw new RuntimeException("Insufficient Balance to done transaction");
@@ -57,7 +56,7 @@ public class UserTransactionDetailsServiceImpl implements UserTransactionDetails
     }
 
 
-    private String handleSellingTransaction(User currentUser, Integer stockId, Integer quantity, TransactionType transactionType, Stock currentStock) throws RuntimeException {
+    public String handleSellingTransaction(User currentUser, Integer stockId, Integer quantity, TransactionType transactionType, Stock currentStock) throws RuntimeException {
 
         Optional<Integer> totalBuyQuantity = userTransactionDetailsRepositroy.getTotalQuantity(currentUser.getUserAccountId(), stockId, TransactionType.BUY);
 
@@ -89,7 +88,7 @@ public class UserTransactionDetailsServiceImpl implements UserTransactionDetails
 
         for (Integer stockId : uniqueStockid) {
 
-            Stock currentStock = stockService.getStockById(stockId).get();
+            Stock currentStock = stockService.findStockById(stockId).get();
 
 
             Optional<Integer> totalSellingQuantity = userTransactionDetailsRepositroy.getTotalQuantity(userAccountId, currentStock.getStockId(), TransactionType.SELL);

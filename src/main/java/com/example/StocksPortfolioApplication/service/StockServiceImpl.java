@@ -1,12 +1,9 @@
 package com.example.StocksPortfolioApplication.service;
 
 
-import com.example.StocksPortfolioApplication.dto.StockUpdatingDto;
 import com.example.StocksPortfolioApplication.model.Stock;
 import com.example.StocksPortfolioApplication.repository.StockRepositroy;
 import com.example.StocksPortfolioApplication.utils.GenerateStockToBeUpdate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +26,7 @@ public class StockServiceImpl  implements StockService{
         this.generateStockToBeUpdate = generateStockToBeUpdate;
     }
 
-    public Optional<Stock> getStockById(Integer stockId) throws RuntimeException {
+    public Optional<Stock> findStockById(Integer stockId) throws RuntimeException {
 
         Optional<Stock> currentStockDetails=stockRepositroy.findStockByStockId(stockId);
 
@@ -41,12 +38,12 @@ public class StockServiceImpl  implements StockService{
         throw new RuntimeException("No Such StockId Exists in the Table");
     }
 
-    public List<Stock> getAllStocks() throws RuntimeException {
+    public List<Stock> getAllStocksList() throws RuntimeException {
 
         return stockRepositroy.findAll();
     }
 
-    public Optional<String> deleteStockById(Integer stockId) throws RuntimeException {
+    public Optional<String> deleteStock(Integer stockId) throws RuntimeException {
 
         Optional<Stock> currentStockDetails=stockRepositroy.findStockByStockId(stockId);
 
@@ -61,7 +58,7 @@ public class StockServiceImpl  implements StockService{
         throw new RuntimeException("No Such StockId Exists in the Table So Deletion is Not Possible");
     }
 
-    public String updateStockByStockId(Integer stockId, Stock stockToBeUpdated) throws RuntimeException {
+    public String updateStock(Integer stockId, Stock stockToBeUpdated) throws RuntimeException {
 
         Optional<Stock> currentStockDetails = stockRepositroy.findStockByStockId(stockId);
 
@@ -80,28 +77,29 @@ public class StockServiceImpl  implements StockService{
 
        }
 
-       return addStock(stockToBeUpdated);
+        return addNewStock(stockToBeUpdated);
 
     }
 
-    public String addStock(Stock stockToBeAdded) throws RuntimeException {
+    public String addNewStock(Stock stockToBeAdded) throws RuntimeException {
+
         stockRepositroy.save(stockToBeAdded);
 
         return "Stock has been Added Successfully";
     }
 
-    public String updateListOfStocks(List<Stock> listOfAllStocksToBeUpdated) throws RuntimeException {
+    public String updateStocksList(List<Stock> listOfAllStocksToBeUpdated) throws RuntimeException {
 
         for(Stock stock:listOfAllStocksToBeUpdated){
 
-            updateStockByStockId(stock.getStockId(), stock);
+            updateStock(stock.getStockId(), stock);
         }
 
         return "updation of all stocks is done successfully";
     }
 
 
-    public String updateAllStocks(MultipartFile file) throws IOException, RuntimeException {
+    public String updateStocksFromFile(MultipartFile file) throws IOException, RuntimeException {
 
         CompletableFuture<String> future = generateStockToBeUpdate.generateStockToBeUpdateAsync(file)
 
@@ -109,7 +107,7 @@ public class StockServiceImpl  implements StockService{
 
                     try {
 
-                        return updateListOfStocks(listOfAllStocks);
+                        return updateStocksList(listOfAllStocks);
 
                     } catch (RuntimeException e) {
 

@@ -4,12 +4,13 @@ package com.example.StocksPortfolioApplication.model;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Table(name = "users_transaction_details")
 @Entity
 public class UserTransactionDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Integer userTransactionDetailsId;
 
     private Integer userAccountId;
@@ -79,4 +80,6 @@ public class UserTransactionDetails {
     public void setStockPrice(Double stockPrice) {
         this.stockPrice = stockPrice;
     }
+
+
 }

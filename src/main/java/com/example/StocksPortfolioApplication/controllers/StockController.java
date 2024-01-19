@@ -1,8 +1,10 @@
 package com.example.StocksPortfolioApplication.controllers;
 
+import com.example.StocksPortfolioApplication.dto.InputStockDto;
 import com.example.StocksPortfolioApplication.utils.GenerateStockToBeUpdate;
 import com.example.StocksPortfolioApplication.model.Stock;
 import com.example.StocksPortfolioApplication.service.StockService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/stocks")
+@RequestMapping ("/stockPortfolioApp/stocks")
 public class StockController {
 
     private StockService stockService;
@@ -29,7 +31,7 @@ public class StockController {
     @GetMapping("/getAllStocks")
     ResponseEntity<List<Stock>> getAllStocks(){
         try{
-            return new ResponseEntity<>(stockService.getAllStocks(), HttpStatusCode.valueOf(200));
+            return new ResponseEntity<>(stockService.getAllStocksList(), HttpStatusCode.valueOf(200));
         } catch (RuntimeException E) {
            return new ResponseEntity<>(HttpStatusCode.valueOf(404));
         }
@@ -39,7 +41,7 @@ public class StockController {
     ResponseEntity<? extends Object> getStockById(@PathVariable Integer stockId) throws RuntimeException {
 
         try{
-            return new ResponseEntity<>(stockService.getStockById(stockId).get(), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(stockService.findStockById(stockId).get(), HttpStatus.ACCEPTED);
         } catch (RuntimeException ex) {
 
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -48,19 +50,24 @@ public class StockController {
     }
 
     @PostMapping("/createStock")
-    ResponseEntity<String> createStock(@RequestBody   Stock stockToBeAdded){
+    ResponseEntity<String> createStock(@Valid @RequestBody InputStockDto stockToBeAdded) throws RuntimeException {
         try{
-            return new ResponseEntity<>(stockService.addStock(stockToBeAdded),HttpStatusCode.valueOf(201));
+
+            return new ResponseEntity<>(stockService.addNewStock(new Stock(stockToBeAdded.getId(), stockToBeAdded.getOpenPrice(), stockToBeAdded.getClosePrice(), stockToBeAdded.getHighPrice(), stockToBeAdded.getLowPrice(), stockToBeAdded.getQuantity(), stockToBeAdded.getName(), stockToBeAdded.getCurrentPrice())), HttpStatusCode.valueOf(201));
         } catch (RuntimeException E) {
-            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+
+            return new ResponseEntity<>(E.getMessage(), HttpStatus.NOT_IMPLEMENTED);
         }
     }
 
     @PutMapping ("/updateStock/{stockId}")
-    ResponseEntity<String> updateStockById(@PathVariable Integer stockId,@RequestBody Stock stockToBeUpdated){
+    ResponseEntity<String> updateStockById(@PathVariable Integer stockId, @Valid @RequestBody InputStockDto stockToBeUpdated) {
+
         try{
-            return new ResponseEntity<>(stockService.updateStockByStockId(stockId,stockToBeUpdated),HttpStatus.ACCEPTED);
+
+            return new ResponseEntity<>(stockService.updateStock(stockId, new Stock(stockToBeUpdated.getId(), stockToBeUpdated.getOpenPrice(), stockToBeUpdated.getClosePrice(), stockToBeUpdated.getHighPrice(), stockToBeUpdated.getLowPrice(), stockToBeUpdated.getQuantity(), stockToBeUpdated.getName(), stockToBeUpdated.getCurrentPrice())), HttpStatus.ACCEPTED);
         } catch (RuntimeException E) {
+
             return new ResponseEntity<>(E.getMessage(),HttpStatus.BAD_REQUEST);
         }
 
@@ -73,7 +80,7 @@ public class StockController {
         }
 
         try {
-            return ResponseEntity.status(200).body(stockService.updateAllStocks(file));
+            return ResponseEntity.status(200).body(stockService.updateStocksFromFile(file));
         } catch (IOException io) {
             return ResponseEntity.status(408).body(io.getMessage());
         } catch (RuntimeException E) {

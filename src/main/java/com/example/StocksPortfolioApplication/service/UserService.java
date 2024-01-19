@@ -22,7 +22,7 @@ public interface UserService {
 
    public String addUser(InputUserDto user);
 
-   public void updateUser(User user);
+   public String updateUser(Integer userId, InputUserDto userUpdate) throws RuntimeException;
 
    public String tradingApi(Integer userAccountId, Integer stockId, Integer quantity, TransactionType transactionType) throws RuntimeException;
 

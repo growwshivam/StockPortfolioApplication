@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping ("/stockPortfolioApp/users")
 public class UserController {
     private UserService userService;
 
@@ -58,7 +58,7 @@ public class UserController {
     }
 
     @PostMapping("/makeTrading")
-    public ResponseEntity<? extends Object> makeTransaction(@RequestBody TransactionInputTypeDto transactionInputTypeDto) {
+    public ResponseEntity<? extends Object> makeTransaction(@Valid @RequestBody TransactionInputTypeDto transactionInputTypeDto) {
         try {
 
             return new ResponseEntity<>(userService.tradingApi(transactionInputTypeDto.getUserAccountId(), transactionInputTypeDto.getStockId(), transactionInputTypeDto.getQuantity(), transactionInputTypeDto.getTransactionType()), HttpStatus.CREATED);

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -37,7 +38,7 @@ public class StockServiceTest {
 
     @Mock
     private StockRepositroy stockRepositroy;
-    @Spy
+    @Mock
     private GenerateStockToBeUpdate generateStockToBeUpdate;
     private List<Stock> listOfStocks = new ArrayList<>();
 
@@ -51,32 +52,33 @@ public class StockServiceTest {
     }
 
     @Test
-    public void testCreateStockApi() throws RuntimeException {
+    public void test_addNewStock() throws RuntimeException {
         Stock currentStockToBeCreate = new Stock(4, 8.0, 12.0, 6.0, 9.2, 15, "ABC", 6.0);
 
-        when(stockRepositroy.save(currentStockToBeCreate)).thenReturn(currentStockToBeCreate);
-        String result = stockServiceImpl.addStock(currentStockToBeCreate);
-        verify(stockRepositroy, times(1)).save(currentStockToBeCreate);
-
+        ArgumentCaptor<Stock> argumentStock = ArgumentCaptor.forClass(Stock.class);
+        String result = stockServiceImpl.addNewStock(currentStockToBeCreate);
+        verify(stockRepositroy, times(1)).save(argumentStock.capture());
+        Assertions.assertEquals(argumentStock.getValue().getName(), "ABC");
+        Assertions.assertEquals(argumentStock.getValue().getQuantity(), 15);
         Assertions.assertEquals(result, "Stock has been Added Successfully");
     }
 
     @Test
-    public void testGetStockApi_WhenInputIsValid() throws RuntimeException {
+    public void test_findStockById_WhenInputIsValid() throws RuntimeException {
         Stock currentStockToBeGet = new Stock(4, 8.0, 12.0, 6.0, 9.2, 15, "ABC", 6.0);
         when(stockRepositroy.findStockByStockId(4)).thenReturn(Optional.of(currentStockToBeGet));
 
-        Optional<Stock> getTestStock = stockServiceImpl.getStockById(4);
+        Optional<Stock> getTestStock = stockServiceImpl.findStockById(4);
         verify(stockRepositroy, times(1)).findStockByStockId(4);
 
 
     }
 
     @Test
-    public void testGetStockApi_WhenInputIsNotValid() throws RuntimeException {
+    public void test_findStockById_WhenInputIsNotValid() throws RuntimeException {
         when(stockRepositroy.findStockByStockId(10)).thenThrow(new RuntimeException("No Such stock exists in the table"));
         try {
-            Optional<Stock> newStock = stockServiceImpl.getStockById(10);
+            Optional<Stock> newStock = stockServiceImpl.findStockById(10);
         } catch (RuntimeException E) {
             verify(stockRepositroy, times(1)).findStockByStockId(10);
             Assertions.assertEquals("No Such stock exists in the table", E.getMessage());
@@ -84,15 +86,15 @@ public class StockServiceTest {
     }
 
     @Test
-    public void testGetAllStockApi() throws RuntimeException {
+    public void test_getAllStocksList() throws RuntimeException {
         when(stockRepositroy.findAll()).thenReturn(listOfStocks);
-        List<Stock> getAllTestStock = stockServiceImpl.getAllStocks();
+        List<Stock> getAllTestStock = stockServiceImpl.getAllStocksList();
         verify(stockRepositroy, times(1)).findAll();
         Assertions.assertEquals(getAllTestStock.size(), 5);
     }
 
     @Test
-    public void testUpdateStockApi() throws RuntimeException {
+    public void test_updateStock() throws RuntimeException {
         Stock intialStock = new Stock(4, 8.0, 12.0, 6.0, 9.2, 15, "ABC", 6.0);
 
         when(stockRepositroy.findStockByStockId(4)).thenReturn(Optional.of(intialStock));
@@ -106,7 +108,7 @@ public class StockServiceTest {
 
         when(stockRepositroy.save(intialStock)).thenReturn(intialStock);
 
-        String resultOfUpdation = stockServiceImpl.updateStockByStockId(4, intialStock);
+        String resultOfUpdation = stockServiceImpl.updateStock(4, intialStock);
 
         verify(stockRepositroy, times(1)).findStockByStockId(4);
 
@@ -118,7 +120,7 @@ public class StockServiceTest {
 
 
     @Test
-    public void testUpdateOfAllStocksApi() throws IOException, RuntimeException {
+    public void test_updateStocksFromFile_WhenFileInputIsValid() throws IOException, RuntimeException {
         String fileName = "EQ150124 copy.CSV";
         Path filePath = Paths.get(fileName);
         byte[] newFileContent = new byte[0];
@@ -146,7 +148,7 @@ public class StockServiceTest {
         when(generateStockToBeUpdate.generateStockToBeUpdateAsync(mockFile))
                 .thenReturn(CompletableFuture.completedFuture(listOfAllStocks));
 
-        String resultString = stockServiceImpl.updateAllStocks(mockFile);
+        String resultString = stockServiceImpl.updateStocksFromFile(mockFile);
 
         verify(generateStockToBeUpdate, times(1)).generateStockToBeUpdateAsync(mockFile);
 
@@ -154,5 +156,42 @@ public class StockServiceTest {
 
     }
 
+    @Test
+    public void test_updateStocksFromFile_WhenFileInputIsInvalid() throws IOException, RuntimeException {
+
+        String invalidFileName = "invalidFile.csv";
+        Path invalidFilePath = Paths.get(invalidFileName);
+        byte[] invalidFileContent = "Invalid file content".getBytes();
+
+        MultipartFile mockInvalidFile = new MockMultipartFile(
+                "file",
+                invalidFileName,
+                "text/plain",
+                invalidFileContent
+        );
+
+
+        when(generateStockToBeUpdate.generateStockToBeUpdateAsync(mockInvalidFile))
+                .thenReturn(CompletableFuture.failedFuture(new IOException("Invalid file")));
+
+
+        String resultString = stockServiceImpl.updateStocksFromFile(mockInvalidFile);
+
+
+        verify(generateStockToBeUpdate, times(1)).generateStockToBeUpdateAsync(mockInvalidFile);
+
+
+        Assertions.assertEquals("Error processing file: Invalid file", resultString);
+    }
+
+    @Test
+
+    public void test_updateStocksList() throws Exception {
+
+        String result = stockServiceImpl.updateStocksList(listOfStocks);
+
+        Assertions.assertEquals(result, "updation of all stocks is done successfully");
+
+    }
 
 }

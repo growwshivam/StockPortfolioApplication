@@ -1,23 +1,45 @@
 package com.example.StocksPortfolioApplication.dto;
 
-import org.springframework.stereotype.Component;
+
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
+public class InputStockDto {
 
 
-public class StockUpdatingDto {
+    @NotNull
 
         private Integer id;
+
+
+    @NotNull
         private Double openPrice;
-        private Double closePrice;
+
+    @NotNull
+    private Double closePrice;
+
+    @NotNull
         private Double lowPrice;
-        private Double highPrice;
+
+    @NotNull
+    private Double highPrice;
+
+    @NotNull
         private Double currentPrice;
+
+    @NotNull
         private Integer quantity;
+
+    @NotBlank
         private String name;
-        public StockUpdatingDto(){
+
+    public InputStockDto() {
 
         }
 
-    public StockUpdatingDto(Double openPrice, Double closePrice, Double lowPrice, Double highPrice, Double currentPrice, Integer quantity, String name) {
+    public InputStockDto(Double openPrice, Double closePrice, Double lowPrice, Double highPrice, Double currentPrice, Integer quantity, String name) {
         this.openPrice = openPrice;
         this.closePrice = closePrice;
         this.lowPrice = lowPrice;
