@@ -4,6 +4,9 @@ package com.example.StocksPortfolioApplication.service;
 import com.example.StocksPortfolioApplication.model.Stock;
 import com.example.StocksPortfolioApplication.repository.StockRepositroy;
 import com.example.StocksPortfolioApplication.utils.GenerateStockToBeUpdate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +29,7 @@ public class StockServiceImpl  implements StockService{
         this.generateStockToBeUpdate = generateStockToBeUpdate;
     }
 
+    @Cacheable (value = "stocks",key = "#stockId")
     public Optional<Stock> findStockById(Integer stockId) throws RuntimeException {
 
         Optional<Stock> currentStockDetails=stockRepositroy.findStockByStockId(stockId);
@@ -42,7 +46,7 @@ public class StockServiceImpl  implements StockService{
 
         return stockRepositroy.findAll();
     }
-
+    @CacheEvict (value = "stocks",key = "#stockId" )
     public Optional<String> deleteStock(Integer stockId) throws RuntimeException {
 
         Optional<Stock> currentStockDetails=stockRepositroy.findStockByStockId(stockId);
@@ -57,7 +61,7 @@ public class StockServiceImpl  implements StockService{
 
         throw new RuntimeException("No Such StockId Exists in the Table So Deletion is Not Possible");
     }
-
+    @CachePut (value = "stocks",key = "#stockId")
     public String updateStock(Integer stockId, Stock stockToBeUpdated) throws RuntimeException {
 
         Optional<Stock> currentStockDetails = stockRepositroy.findStockByStockId(stockId);

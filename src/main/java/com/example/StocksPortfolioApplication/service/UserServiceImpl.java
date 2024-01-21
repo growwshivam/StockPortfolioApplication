@@ -7,6 +7,9 @@ import com.example.StocksPortfolioApplication.model.TransactionType;
 import com.example.StocksPortfolioApplication.model.User;
 import com.example.StocksPortfolioApplication.model.UserTransactionDetails;
 import com.example.StocksPortfolioApplication.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,6 +26,7 @@ public class UserServiceImpl  implements UserService{
         this.userTransactionDetailsService = userTransactionDetailsService;
     }
 
+    @Cacheable (value="users",key="#userAccountId")
     public Optional<User> getUserById(Integer userAccountId) throws RuntimeException {
 
         Optional<User> currentUserDetails=userRepository.findUserByUserAccountId(userAccountId);
@@ -35,6 +39,7 @@ public class UserServiceImpl  implements UserService{
         throw new RuntimeException("No Such User AccountId Does not exists in the user table");
     }
 
+    @CacheEvict (value="users",key="#userAccountId")
     public String deleteUserById(Integer userAccountId) throws RuntimeException {
 
         Optional<User> currentUserDetails=userRepository.findUserByUserAccountId(userAccountId);
@@ -57,6 +62,7 @@ public class UserServiceImpl  implements UserService{
     }
 
 
+    @CachePut (value="users",key="#userAccountId")
     public String updateUser(Integer userAccountId, InputUserDto userToBeUpdate) throws RuntimeException {
         Optional<User> existingUser = userRepository.findUserByUserAccountId(userAccountId);
         if (existingUser.isPresent()) {
